@@ -23,19 +23,23 @@ func AuthenMiddleware() gin.HandlerFunc {
 		if len(token) <= 0 {
 			c.JSON(401, errors.TokenNotFoundError())
 			c.Abort()
+			return
 		}
 
 		authResult, err := client.RetrospectToken(c, token, clientId, clientSecret, realm)
 		if err != nil {
 			c.JSON(500, errors.InternalServerError(err.Error()))
 			c.Abort()
+			return
 		}
 
 		isActive := *authResult.Active
 		if !isActive {
 			c.JSON(401, errors.UnauthorizedError())
 			c.Abort()
+			return
 		}
+		c.Next()
 
 	}
 }
